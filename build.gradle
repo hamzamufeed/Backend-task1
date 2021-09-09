@@ -1,0 +1,37 @@
+plugins {
+	id 'org.springframework.boot' version '2.5.4'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+group = 'com.task1'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	all {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation group: 'com.aerospike', name: 'spring-data-aerospike', version: '2.4.2.RELEASE'
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: '2.5.4'
+}
+
+test {
+	useJUnitPlatform()
+}
