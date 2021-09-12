@@ -1,11 +1,15 @@
 package com.task1.configuration;
 
+import com.aerospike.client.AerospikeClient;
 import com.aerospike.client.Host;
 import com.task1.DB.AerospikeResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.aerospike.config.AbstractAerospikeDataConfiguration;
+import org.springframework.data.aerospike.query.QueryEngine;
+import org.springframework.data.aerospike.query.StatementBuilder;
 import org.springframework.data.aerospike.repository.config.EnableAerospikeRepositories;
 
 import java.util.Collection;
@@ -27,5 +31,14 @@ public class AerospikeConfiguration extends AbstractAerospikeDataConfiguration {
     @Override
     protected String nameSpace() {
         return aerospikeConfigurationProperties.getNamespace();
+    }
+
+    @Override
+    @Bean(name = "aerospikeQueryEngine")
+    public QueryEngine queryEngine(AerospikeClient aerospikeClient,
+                                   StatementBuilder statementBuilder) {
+        QueryEngine queryEngine = new QueryEngine(aerospikeClient, statementBuilder, aerospikeClient.getQueryPolicyDefault());
+        queryEngine.setScansEnabled(true);
+        return queryEngine;
     }
 }
