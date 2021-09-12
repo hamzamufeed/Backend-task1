@@ -30,6 +30,7 @@ dependencies {
 	implementation group: 'com.aerospike', name: 'spring-data-aerospike', version: '2.4.2.RELEASE'
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: '2.5.4'
+	implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
 }
 
 test {

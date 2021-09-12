@@ -1,7 +1,6 @@
 package com.task1.configuration;
 
 import com.aerospike.client.Host;
-import com.task1.DB.AerospikeOrderRepository;
 import com.task1.DB.AerospikeResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

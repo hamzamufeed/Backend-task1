@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class ResourceService {
@@ -23,9 +25,14 @@ public class ResourceService {
     @Autowired
     public ObjectMapper objectMapper;
 
-    public ResourceDTO getResource(int id){ return (ResourceDTO) transformerService.EntityToDto((Model) aerospikeResourceRepository.findById(id).get(), ResourceDTO.class); }
+    public ResourceDTO getResource(int id){
+        Optional<ResourceModel> resource = aerospikeResourceRepository.findById(id);
+        return (resource.isPresent()) ? (ResourceDTO) transformerService.EntityToDto((Model) resource.get(), ResourceDTO.class) : null;
+    }
 
-    public void addResource(ResourceDTO resourceDTO){ aerospikeResourceRepository.save((ResourceModel) transformerService.DtoToEntity((DTO) resourceDTO, ResourceModel.class)); }
+    public void addResource(ResourceDTO resourceDTO){
+        aerospikeResourceRepository.save((ResourceModel) transformerService.DtoToEntity((DTO) resourceDTO, ResourceModel.class));
+    }
 
     public ResourceDTO updateResource(ResourceDTO resourceDTO) {
         ResourceModel updatedResourceModel = aerospikeResourceRepository.save((ResourceModel) transformerService.DtoToEntity((DTO) resourceDTO, ResourceModel.class));
