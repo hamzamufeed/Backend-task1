@@ -14,7 +14,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderDTO implements DTO {
+public class OrderDTO implements DTO, Comparable<OrderDTO> {
 
     @Id
     @NotNull
@@ -31,4 +31,14 @@ public class OrderDTO implements DTO {
     private String type;
     private double totalPrice;
     private Date date;
+
+    @Override
+    public int compareTo(OrderDTO o) {
+        if(this.totalPrice == o.getTotalPrice())
+            return 0;
+        else if(this.totalPrice > o.getTotalPrice())
+            return -1;
+        else
+            return 1;
+    }
 }

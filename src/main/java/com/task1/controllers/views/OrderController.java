@@ -1,13 +1,16 @@
 package com.task1.controllers.views;
 
-import com.task1.DB.OrderModel;
 import com.task1.controllers.DTOs.OrderDTO;
 import com.task1.services.OrderService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -54,9 +57,17 @@ public class OrderController {
         orderService.removeOrderById(id);
     }
 
+//    @GetMapping("/order/history")
+//    @ResponseBody
+//    public List<OrderDTO> getOrderHistory(@RequestParam Map<String,String> allRequestParams){
+//        return orderService.getOrderHistory(allRequestParams.toString());
+//    }
     @GetMapping("/order/history")
-    @ResponseBody
-    public Iterable<OrderModel> getOrderHistory(@RequestParam Map<String,String> allRequestParams){
-        return orderService.getOrderHistory(allRequestParams.toString());
+    public List<OrderDTO> getOrderHistory(
+            @RequestParam() int count,
+            @RequestParam() String orderType,
+            @RequestParam() boolean sorted
+    ){
+        return orderService.getOrderHistory(count, orderType, sorted);
     }
 }

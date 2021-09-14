@@ -8,11 +8,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class ResourceController {
 
     @Autowired
     ResourceService resourceService;
+
+    @GetMapping("/resource/")
+    public List<ResourceDTO> getAll(){
+        return resourceService.getAllResources();
+    }
 
     @GetMapping("/resource/{id}")
     public ResponseEntity<?> getResource(@PathVariable int id){

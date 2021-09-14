@@ -9,8 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @AllArgsConstructor
@@ -76,9 +80,15 @@ public class OrderService {
 
     public final Logger logger = LogManager.getLogger(TransformerService.class);
 
-    public Iterable<OrderModel> getOrderHistory(String requestParams) {
-        logger.info(requestParams);
-        //return null;
-        return aerospikeOrderRepository.findAll();
+    public List<OrderDTO> getOrderHistory(int count, String orderType, boolean sorted) {
+        logger.info("Count: "+count+" - Order Type: "+orderType+" - Sorted: "+sorted);
+        Iterable<OrderModel> all = aerospikeOrderRepository.findAll();
+        return StreamSupport
+                .stream(all.spliterator(), false)
+                .map( i -> (OrderDTO) transformerService.EntityToDto(i, OrderDTO.class))
+                .filter( i -> i.getType().equals(orderType))
+                .limit(count)
+                .sorted()
+                .collect(Collectors.toList());
     }
 }
