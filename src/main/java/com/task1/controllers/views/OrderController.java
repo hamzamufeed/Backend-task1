@@ -19,6 +19,11 @@ public class OrderController {
     @Autowired
     OrderService orderService;
 
+    @GetMapping("/order/")
+    public List<OrderDTO> getAllOrder(){
+        return orderService.getAllOrders();
+    }
+
     @GetMapping("/order/{id}")
     public ResponseEntity<?> getOrder(@PathVariable int id){
         OrderDTO orderDTO = orderService.getOrder(id);
@@ -62,12 +67,12 @@ public class OrderController {
 //    public List<OrderDTO> getOrderHistory(@RequestParam Map<String,String> allRequestParams){
 //        return orderService.getOrderHistory(allRequestParams.toString());
 //    }
+
     @GetMapping("/order/history")
     public List<OrderDTO> getOrderHistory(
             @RequestParam() int count,
             @RequestParam() String orderType,
-            @RequestParam() boolean sorted
-    ){
+            @RequestParam() boolean sorted) {
         return orderService.getOrderHistory(count, orderType, sorted);
     }
 }

@@ -1,40 +1,53 @@
 package com.task1.DB;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.StreamSupport;
 
-public enum ResourceCache {
-    CACHE;
 
-    private HashMap<Integer, ResourceModel> resources = new HashMap<>();
+public enum ResourceCache {
+    RESOURCE_CACHE;
 
     @Autowired
     AerospikeResourceRepository aerospikeResourceRepository;
 
+    private HashMap<Integer, ResourceModel> resources = new HashMap<>();
+
     ResourceCache() {
-        Iterable<ResourceModel> all = aerospikeResourceRepository.findAll();
+    }
+
+    public synchronized ResourceCache getInstance() {
+        return RESOURCE_CACHE;
+    }
+
+    public synchronized HashMap<Integer, ResourceModel> getResources() {
+        return this.resources;
+    }
+
+    public synchronized void setResources(List<ResourceModel> all) {
         StreamSupport
                 .stream(all.spliterator(), false)
                 .forEach(r -> this.resources.put(r.getId(), r));
     }
 
-    private synchronized HashMap<Integer, ResourceModel> getInstance() {
-        return this.resources;
-    }
-
-    private synchronized ResourceModel read(int key) {
+    public synchronized ResourceModel read(int key) {
         return this.resources.get(key);
     }
 
-    private synchronized void write(ResourceModel resourceModel) {
+    public synchronized void write(ResourceModel resourceModel) {
         this.resources.put(resourceModel.getId(), resourceModel);
-        this.aerospikeResourceRepository.save(resourceModel);
     }
 
-    private synchronized void update(int key, ResourceModel resourceModel) {
-        this.resources.put(key, resourceModel);
-        this.aerospikeResourceRepository.save(resourceModel);
+    public synchronized void update(int key, ResourceModel resourceModel) {
+        this.resources.replace(key, resourceModel);
+    }
+
+    public synchronized void patch(int key, String patch){
+        //this.resources.replace(key, patch);
+    }
+
+    public synchronized void delete(int key) {
+        this.resources.remove(key);
     }
 }

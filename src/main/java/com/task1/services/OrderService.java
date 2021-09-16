@@ -2,6 +2,7 @@ package com.task1.services;
 
 import com.task1.DB.*;
 import com.task1.controllers.DTOs.OrderDTO;
+import com.task1.controllers.DTOs.ResourceDTO;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -29,48 +32,77 @@ public class OrderService {
     @Autowired
     TransformerService transformerService;
 
+    OrderCache orderCache;
+    ResourceCache resourceCache;
+
+    @PostConstruct
+    public void init(){
+        orderCache.ORDER_CACHE.setOrders(
+                StreamSupport
+                        .stream(aerospikeOrderRepository.findAll().spliterator(), false)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    public List<OrderDTO> getAllOrders(){
+        ArrayList<OrderModel> all = new ArrayList<>(orderCache.getOrders().values());
+        return StreamSupport
+                .stream(all.spliterator(), false)
+                .map( i -> (OrderDTO) transformerService.EntityToDto((Model) i, OrderDTO.class))
+                .collect(Collectors.toList());
+    }
+
     public OrderDTO getOrder(int id){
-        Optional<OrderModel> orderModel = aerospikeOrderRepository.findById(id);
-        return (orderModel.isPresent()) ? (OrderDTO) transformerService.EntityToDto(orderModel.get(), OrderDTO.class) : null;
+//        Optional<OrderModel> orderModel = aerospikeOrderRepository.findById(id);
+//        return (orderModel.isPresent()) ? (OrderDTO) transformerService.EntityToDto(orderModel.get(), OrderDTO.class) : null;
+        OrderModel order = orderCache.read(id);
+        return (order != null) ? (OrderDTO) transformerService.EntityToDto((Model) order, OrderDTO.class) : null;
     }
 
     public ResponseEntity<?> supply(OrderDTO orderDTO){
-        Optional<ResourceModel> resourceModel = aerospikeResourceRepository.findById(orderDTO.getResourceId());
-        if(!resourceModel.isPresent())
+//        Optional<ResourceModel> resourceModel = aerospikeResourceRepository.findById(orderDTO.getResourceId());
+        ResourceModel resourceModel = resourceCache.read(orderDTO.getResourceId());
+        if(resourceModel == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Resource Doesn't Exist");
         else {
             Date date = new Date();
             orderDTO.setDate(date);
             orderDTO.setType("supply");
-            orderDTO.setTotalPrice(orderDTO.getQuantity() * resourceModel.get().getPrice());
-            resourceModel.get().setQuantity(resourceModel.get().getQuantity() + orderDTO.getQuantity());
+            orderDTO.setTotalPrice(orderDTO.getQuantity() * resourceModel.getPrice());
+            resourceModel.setQuantity(resourceModel.getQuantity() + orderDTO.getQuantity());
             OrderModel orderModel = aerospikeOrderRepository.save((OrderModel) transformerService.DtoToEntity((DTO) orderDTO, OrderModel.class));
-            aerospikeResourceRepository.save(resourceModel.get());
+            orderCache.write(orderModel);
+            aerospikeResourceRepository.save(resourceModel);
+            resourceCache.update(resourceModel.getId(), resourceModel);
             return ResponseEntity.status(HttpStatus.CREATED).body(orderModel);
         }
         //DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     }
 
     public ResponseEntity<?> purchase(OrderDTO orderDTO) {
-        Optional<ResourceModel> resourceModel = aerospikeResourceRepository.findById(orderDTO.getResourceId());
-        if(!resourceModel.isPresent())
+//        Optional<ResourceModel> resourceModel = aerospikeResourceRepository.findById(orderDTO.getResourceId());
+        ResourceModel resourceModel = resourceCache.read(orderDTO.getResourceId());
+        if(resourceModel == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Resource Doesn't Exist");
-        else if(orderDTO.getQuantity() > resourceModel.get().getQuantity())
+        else if(orderDTO.getQuantity() > resourceModel.getQuantity())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Insufficient Quantity");
         else {
             Date date = new Date();
             orderDTO.setDate(date);
             orderDTO.setType("purchase");
-            orderDTO.setTotalPrice(orderDTO.getQuantity() * resourceModel.get().getPrice());
-            resourceModel.get().setQuantity(resourceModel.get().getQuantity() - orderDTO.getQuantity());
+            orderDTO.setTotalPrice(orderDTO.getQuantity() * resourceModel.getPrice());
+            resourceModel.setQuantity(resourceModel.getQuantity() - orderDTO.getQuantity());
             OrderModel orderModel = aerospikeOrderRepository.save((OrderModel) transformerService.DtoToEntity((DTO) orderDTO, OrderModel.class));
-            aerospikeResourceRepository.save(resourceModel.get());
+            orderCache.write(orderModel);
+            aerospikeResourceRepository.save(resourceModel);
+            resourceCache.update(resourceModel.getId(), resourceModel);
             return ResponseEntity.status(HttpStatus.CREATED).body(orderModel);
         }
     }
 
     public OrderDTO updateOrder(OrderDTO orderDTO) {
         OrderModel updatedOrderModel = aerospikeOrderRepository.save((OrderModel) transformerService.DtoToEntity((DTO) orderDTO, OrderModel.class));
+        orderCache.update(updatedOrderModel.getId(), updatedOrderModel);
         return (OrderDTO) transformerService.EntityToDto((Model) updatedOrderModel, OrderDTO.class);
     }
 
