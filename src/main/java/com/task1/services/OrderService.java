@@ -2,7 +2,6 @@ package com.task1.services;
 
 import com.task1.DB.*;
 import com.task1.controllers.DTOs.OrderDTO;
-import com.task1.controllers.DTOs.ResourceDTO;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,9 +12,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -112,15 +111,48 @@ public class OrderService {
 
     public final Logger logger = LogManager.getLogger(TransformerService.class);
 
-    public List<OrderDTO> getOrderHistory(int count, String orderType, boolean sorted) {
+    public List<OrderDTO> getOrderHistory(Integer count, String orderType, boolean sorted) {
         logger.info("Count: "+count+" - Order Type: "+orderType+" - Sorted: "+sorted);
         Iterable<OrderModel> all = aerospikeOrderRepository.findAll();
-        return StreamSupport
-                .stream(all.spliterator(), false)
-                .map( i -> (OrderDTO) transformerService.EntityToDto(i, OrderDTO.class))
-                .filter( i -> i.getType().equals(orderType))
-                .limit(count)
-                .sorted()
-                .collect(Collectors.toList());
+        List<OrderDTO> history;
+        if(count == null && orderType == null) {
+            history = StreamSupport
+                    .stream(all.spliterator(), false)
+                    .map(i -> (OrderDTO) transformerService.EntityToDto(i, OrderDTO.class))
+                    .collect(Collectors.toList());
+        }
+        else if(count != null && orderType == null) {
+            history = StreamSupport
+                    .stream(all.spliterator(), false)
+                    .map(i -> (OrderDTO) transformerService.EntityToDto(i, OrderDTO.class))
+                    .limit(count)
+                    .collect(Collectors.toList());
+        }
+        else if(count == null && orderType != null) {
+            history = StreamSupport
+                    .stream(all.spliterator(), false)
+                    .map(i -> (OrderDTO) transformerService.EntityToDto(i, OrderDTO.class))
+                    .filter(i -> i.getType().equals(orderType))
+                    .collect(Collectors.toList());
+        }
+        else {
+            history = StreamSupport
+                    .stream(all.spliterator(), false)
+                    .map(i -> (OrderDTO) transformerService.EntityToDto(i, OrderDTO.class))
+                    .filter(i -> i.getType().equals(orderType))
+                    .limit(count)
+                    .collect(Collectors.toList());
+        }
+        if(sorted)
+            history = StreamSupport
+                    .stream(history.spliterator(), false)
+                    .sorted()
+                    .collect(Collectors.toList());
+        else
+            history = StreamSupport
+                    .stream(history.spliterator(), false)
+                    .sorted(Comparator.comparing(OrderDTO::getDate))
+                    .collect(Collectors.toList());
+        return history;
     }
 }

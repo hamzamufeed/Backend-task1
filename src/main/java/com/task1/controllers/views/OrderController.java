@@ -2,16 +2,12 @@ package com.task1.controllers.views;
 
 import com.task1.controllers.DTOs.OrderDTO;
 import com.task1.services.OrderService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class OrderController {
@@ -70,9 +66,10 @@ public class OrderController {
 
     @GetMapping("/order/history")
     public List<OrderDTO> getOrderHistory(
-            @RequestParam() int count,
-            @RequestParam() String orderType,
+            @RequestParam(required = false) Integer count,
+            @RequestParam(required = false) String orderType,
             @RequestParam() boolean sorted) {
+        System.out.println(count+" "+orderType+" "+sorted);
         return orderService.getOrderHistory(count, orderType, sorted);
     }
 }
