@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class OrderController {
@@ -58,18 +59,16 @@ public class OrderController {
         orderService.removeOrderById(id);
     }
 
-//    @GetMapping("/order/history")
-//    @ResponseBody
-//    public List<OrderDTO> getOrderHistory(@RequestParam Map<String,String> allRequestParams){
-//        return orderService.getOrderHistory(allRequestParams.toString());
-//    }
-
     @GetMapping("/order/history")
-    public List<OrderDTO> getOrderHistory(
-            @RequestParam(required = false) Integer count,
-            @RequestParam(required = false) String orderType,
-            @RequestParam() boolean sorted) {
-        System.out.println(count+" "+orderType+" "+sorted);
-        return orderService.getOrderHistory(count, orderType, sorted);
+    public List<OrderDTO> getOrderHistory(@RequestParam Map<String,String> params){
+        return orderService.getOrderHistory(params);
     }
+
+//    @GetMapping("/order/history")
+//    public List<OrderDTO> getOrderHistory(
+//            @RequestParam(required = false) Integer count,
+//            @RequestParam(required = false) String orderType,
+//            @RequestParam() boolean sorted) {
+//        return orderService.getOrderHistory(count, orderType, sorted);
+//    }
 }

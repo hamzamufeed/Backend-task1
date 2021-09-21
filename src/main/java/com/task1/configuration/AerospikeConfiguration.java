@@ -18,7 +18,6 @@ import java.util.Collections;
 @Configuration
 @EnableConfigurationProperties(AerospikeConfigurationProperties.class)
 @EnableAerospikeRepositories(basePackageClasses = AerospikeResourceRepository.class)
-//@EnableAerospikeRepositories(basePackageClasses = AerospikeOrderRepository.class)
 public class AerospikeConfiguration extends AbstractAerospikeDataConfiguration {
     @Autowired
     private AerospikeConfigurationProperties aerospikeConfigurationProperties;

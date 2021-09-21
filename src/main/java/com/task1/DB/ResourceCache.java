@@ -10,14 +10,11 @@ public enum ResourceCache {
     RESOURCE_CACHE;
 
     @Autowired
-    AerospikeResourceRepository aerospikeResourceRepository;
+    public static AerospikeResourceRepository aerospikeResourceRepository;
 
     private HashMap<Integer, ResourceModel> resources = new HashMap<>();
 
-    ResourceCache() {
-    }
-
-    public synchronized ResourceCache getInstance() {
+    public static synchronized ResourceCache getInstance() {
         return RESOURCE_CACHE;
     }
 

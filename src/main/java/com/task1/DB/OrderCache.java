@@ -1,7 +1,5 @@
 package com.task1.DB;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.StreamSupport;
@@ -9,16 +7,9 @@ import java.util.stream.StreamSupport;
 public enum OrderCache {
     ORDER_CACHE;
 
-    @Autowired
-    AerospikeOrderRepository aerospikeOrderRepository;
-
     private HashMap<Integer, OrderModel> orders = new HashMap<>();
 
-    OrderCache() {
-
-    }
-
-    public synchronized OrderCache getInstance() {
+    public static synchronized OrderCache getInstance() {
         return ORDER_CACHE;
     }
 
